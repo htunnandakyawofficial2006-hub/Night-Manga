@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NightManga — 18+ Manga</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #0b0b10;
+      color: #eee;
+    }
+
+    /* AGE GATE */
+    #ageGate {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(5,5,8,.98);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .age-box {
+      width: 100%;
+      max-width: 450px;
+      text-align: center;
+      background: #15151d;
+      border: 1px solid #292936;
+      border-radius: 20px;
+      padding: 40px 25px;
+      box-shadow: 0 20px 80px rgba(0,0,0,.6);
+    }
+
+    .age-icon {
+      font-size: 60px;
+      margin-bottom: 15px;
+    }
+
+    .age-box h1 {
+      color: #ff3d71;
+      margin-bottom: 12px;
+    }
+
+    .age-box p {
+      color: #aaa;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    .age-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      border-radius: 10px;
+      padding: 12px 22px;
+      font-weight: bold;
+    }
+
+    .enter-btn {
+      background: #ff3d71;
+      color: white;
+    }
+
+    .exit-btn {
+      background: #292936;
+      color: #ccc;
+    }
+
+    /* HEADER */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11,11,16,.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #22222c;
+    }
+
+    .nav {
+      max-width: 1200px;
+      margin: auto;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 25px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 900;
+      color: #ff3d71;
+      white-space: nowrap;
+    }
+
+    .search {
+      flex: 1;
+      background: #181820;
+      border: 1px solid #292936;
+      border-radius: 10px;
+      padding: 12px 15px;
+      color: white;
+      outline: none;
+    }
+
+    .search:focus {
+      border-color: #ff3d71;
+    }
+
+    .menu-btn {
+      background: #181820;
+      color: white;
+    }
+
+    /* HERO */
+    .hero {
+      max-width: 1200px;
+      margin: auto;
+      padding: 70px 20px 40px;
+    }
+
+    .hero h2 {
+      font-size: clamp(32px, 6vw, 60px);
+      margin-bottom: 15px;
+    }
+
+    .hero h2 span {
+      color: #ff3d71;
+    }
+
+    .hero p {
+      max-width: 650px;
+      color: #999;
+      line-height: 1.7;
+    }
+
+    /* FILTER */
+    .filters {
+      max-width: 1200px;
+      margin: auto;
+      padding: 10px 20px 25px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter {
+      background: #17171f;
+      color: #aaa;
+      border: 1px solid #292936;
+    }
+
+    .filter.active,
+    .filter:hover {
+      background: #ff3d71;
+      color: white;
+    }
+
+    /* GRID */
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 0 20px 60px;
+    }
+
+    .section-title {
+      margin: 15px 0 20px;
+      font-size: 25px;
+    }
+
+    .manga-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 18px;
+    }
+
+    .card {
+      background: #15151d;
+      border: 1px solid #242430;
+      border-radius: 13px;
+      overflow: hidden;
+      transition: .25s;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: #ff3d71;
+    }
+
+    .cover {
+      height: 270px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 60px;
+      background:
+        linear-gradient(145deg, #251326, #11111a);
+    }
+
+    .card-info {
+      padding: 13px;
+    }
+
+    .card-info h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .meta {
+      color: #777;
+      font-size: 13px;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 8px;
+      border-radius: 5px;
+      background: #2a1820;
+      color: #ff5a83;
+      font-size: 11px;
+    }
+
+    /* MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: rgba(0,0,0,.85);
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .modal.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      width: 100%;
+      max-width: 850px;
+      background: #15151d;
+      border: 1px solid #2b2b37;
+      border-radius: 18px;
+      padding: 25px;
+      position: relative;
+    }
+
+    .close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #292936;
+      color: white;
+    }
+
+    .detail {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 25px;
+    }
+
+    .detail-cover {
+      height: 310px;
+      border-radius: 10px;
+      background: linear-gradient(145deg,#40152b,#111);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 70px;
+    }
+
+    .detail h2 {
+      margin-bottom: 12px;
+    }
+
+    .detail p {
+      color: #999;
+      line-height: 1.7;
+    }
+
+    .chapters {
+      margin-top: 25px;
+    }
+
+    .chapter {
+      width: 100%;
+      margin-top: 8px;
+      background: #20202a;
+      color: #ddd;
+      text-align: left;
+    }
+
+    .chapter:hover {
+      background: #ff3d71;
+    }
+
+    /* READER */
+    .reader {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: #050507;
+      overflow-y: auto;
+    }
+
+    .reader.show {
+      display: block;
+    }
+
+    .reader-bar {
+      position: sticky;
+      top: 0;
+      background: rgba(5,5,7,.95);
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #222;
+    }
+
+    .reader-page {
+      max-width: 700px;
+      height: 850px;
+      margin: 20px auto;
+      background: linear-gradient(
+        135deg,
+        #272735,
+        #11111a
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #777;
+      font-size: 20px;
+      border-radius: 5px;
+    }
+
+    footer {
+      border-top: 1px solid #222;
+      padding: 30px 20px;
+      text-align: center;
+      color: #666;
+    }
+
+    @media (max-width: 900px) {
+      .manga-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .nav {
+        flex-wrap: wrap;
+      }
+
+      .search {
+        order: 3;
+        flex-basis: 100%;
+      }
+
+      .manga-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .cover {
+        height: 220px;
+      }
+
+      .detail {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-cover {
+        height: 250px;
+      }
+
+      .reader-page {
+        height: 650px;
+        margin: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- AGE GATE -->
+  <div id="ageGate">
+    <div class="age-box">
+      <div class="age-icon">🔞</div>
+      <h1>18+ ONLY</h1>
+      <p>
+        This website is intended for adults only.
+        You must be 18 years or older to enter.
+      </p>
+
+      <div class="age-buttons">
+        <button class="enter-btn" onclick="enterSite()">
+          I'm 18+
+        </button>
+
+        <button class="exit-btn" onclick="leaveSite()">
+          Exit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="nav">
+      <div class="logo">NightManga</div>
+
+      <input
+        id="search"
+        class="search"
+        type="text"
+        placeholder="Search manga..."
+        oninput="searchManga()"
+      >
+
+      <button class="menu-btn">☰</button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h2>Read <span>Manga</span></h2>
+    <p>
+      Discover your next manga. Browse titles, genres and chapters
+      from one clean, mobile-friendly interface.
+    </p>
+  </section>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <button class="filter active" onclick="filterGenre('All', this)">All</button>
+    <button class="filter" onclick="filterGenre('Romance', this)">Romance</button>
+    <button class="filter" onclick="filterGenre('Drama', this)">Drama</button>
+    <button class="filter" onclick="filterGenre('Fantasy', this)">Fantasy</button>
+    <button class="filter" onclick="filterGenre('Action', this)">Action</button>
+  </div>
+
+  <!-- MANGA -->
+  <main class="container">
+    <h2 class="section-title">Latest Manga</h2>
+
+    <div id="mangaGrid" class="manga-grid"></div>
+  </main>
+
+  <footer>
+    © 2026 NightManga — Demo Website
+  </footer>
+
+  <!-- DETAIL MODAL -->
+  <div id="detailModal" class="modal">
+    <div class="modal-content">
+
+      <button class="close" onclick="closeDetail()">✕</button>
+
+      <div class="detail">
+        <div class="detail-cover" id="detailCover">📖</div>
+
+        <div>
+          <h2 id="detailTitle"></h2>
+
+          <p id="detailDescription"></p>
+
+          <div class="chapters">
+            <h3>Chapters</h3>
+            <div id="chapterList"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- READER -->
+  <div id="reader" class="reader">
+
+    <div class="reader-bar">
+      <strong id="readerTitle">Chapter</strong>
+      <button class="exit-btn" onclick="closeReader()">✕ Close</button>
+    </div>
+
+    <!-- Demo pages -->
+    <div class="reader-page">Page 1 — Demo</div>
+    <div class="reader-page">Page 2 — Demo</div>
+    <div class="reader-page">Page 3 — Demo</div>
+
+  </div>
+
+<script>
+
+const manga = [
+  {
+    title: "Midnight Promise",
+    genre: "Romance",
+    icon: "🌙",
+    description: "A fictional romance story set in a mysterious city at midnight."
+  },
+  {
+    title: "Crimson Moon",
+    genre: "Fantasy",
+    icon: "🔴",
+    description: "A fantasy adventure surrounding an ancient crimson moon."
+  },
+  {
+    title: "Silent Heart",
+    genre: "Drama",
+    icon: "🖤",
+    description: "A dramatic story about secrets, friendship and difficult choices."
+  },
+  {
+    title: "Neon Warrior",
+    genre: "Action",
+    icon: "⚡",
+    description: "A futuristic city and a warrior searching for the truth."
+  },
+  {
+    title: "After Dark",
+    genre: "Romance",
+    icon: "🌃",
+    description: "A fictional romantic story that begins after sunset."
+  },
+  {
+    title: "Dark Kingdom",
+    genre: "Fantasy",
+    icon: "🏰",
+    description: "A fictional fantasy kingdom facing a mysterious threat."
+  },
+  {
+    title: "Broken Days",
+    genre: "Drama",
+    icon: "🥀",
+    description: "A fictional drama about memories and second chances."
+  },
+  {
+    title: "Zero Blade",
+    genre: "Action",
+    icon: "⚔️",
+    description: "A fictional action manga about a legendary blade."
+  },
+  {
+    title: "Red Velvet",
+    genre: "Romance",
+    icon: "🌹",
+    description: "A fictional romance story filled with secrets."
+  },
+  {
+    title: "Moon Hunter",
+    genre: "Fantasy",
+    icon: "🌕",
+    description: "A fictional hunter follows mysterious creatures beneath the moon."
+  }
+];
+
+let currentGenre = "All";
+
+function renderManga() {
+
+  const grid = document.getElementById("mangaGrid");
+  const search = document
+    .getElementById("search")
+    .value
+    .toLowerCase();
+
+  grid.innerHTML = "";
+
+  const filtered = manga.filter(item => {
+
+    const genreMatch =
+      currentGenre === "All" ||
+      item.genre === currentGenre;
+
+    const searchMatch =
+      item.title.toLowerCase().includes(search);
+
+    return genreMatch && searchMatch;
+  });
+
+  filtered.forEach(item => {
+
+    const card = document.createElement("div");
+
+    card.className = "card";
+
+    card.innerHTML = `
+      <div class="cover">${item.icon}</div>
+
+      <div class="card-info">
+        <h3>${item.title}</h3>
+        <div class="meta">${item.genre}</div>
+        <span class="badge">18+</span>
+      </div>
+    `;
+
+    card.onclick = () => openDetail(item);
+
+    grid.appendChild(card);
+  });
+}
+
+function filterGenre(genre, button) {
+
+  currentGenre = genre;
+
+  document
+    .querySelectorAll(".filter")
+    .forEach(btn => btn.classList.remove("active"));
+
+  button.classList.add("active");
+
+  renderManga();
+}
+
+function searchManga() {
+  renderManga();
+}
+
+function openDetail(item) {
+
+  document.getElementById("detailTitle").textContent =
+    item.title;
+
+  document.getElementById("detailDescription").textContent =
+    item.description;
+
+  document.getElementById("detailCover").textContent =
+    item.icon;
+
+  const chapters =
+    document.getElementById("chapterList");
+
+  chapters.innerHTML = "";
+
+  for (let i = 1; i <= 8; i++) {
+
+    const btn = document.createElement("button");
+
+    btn.className = "chapter";
+
+    btn.textContent = `Chapter ${i}`;
+
+    btn.onclick = () => openReader(
+      `${item.title} — Chapter ${i}`
+    );
+
+    chapters.appendChild(btn);
+  }
+
+  document
+    .getElementById("detailModal")
+    .classList.add("show");
+}
+
+function closeDetail() {
+  document
+    .getElementById("detailModal")
+    .classList.remove("show");
+}
+
+function openReader(title) {
+
+  closeDetail();
+
+  document.getElementById("readerTitle")
+    .textContent = title;
+
+  document
+    .getElementById("reader")
+    .classList.add("show");
+
+  document.body.style.overflow = "hidden";
+}
+
+function closeReader() {
+
+  document
+    .getElementById("reader")
+    .classList.remove("show");
+
+  document.body.style.overflow = "";
+}
+
+function enterSite() {
+
+  document
+    .getElementById("ageGate")
+    .style.display = "none";
+
+  localStorage.setItem("ageVerified", "true");
+}
+
+function leaveSite() {
+  window.location.href = "https://www.google.com";
+}
+
+if (localStorage.getItem("ageVerified") === "true") {
+  document.getElementById("ageGate").style.display = "none";
+}
+
+renderManga();
+
+</script>
+
+</body>
+</html>
